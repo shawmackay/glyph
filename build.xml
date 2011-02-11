@@ -1,0 +1,132 @@
+
+<project name="glyph" basedir="." default="dist">
+	<taskdef name="apt" classname="org.apache.tools.ant.taskdefs.Apt" classpath="lib/ant-apt.jar" />
+	<target name="init">
+		<echo message="building" />
+		<property name="dist" value="dist" />
+		<property name="build" value="build" />
+		<property name="classes" value="build/classes" />
+		<property name="jini.home.lib" value="/Volumes/Data/Development/Java/Jini2.1/lib" />
+		<property name="java.libs.loc" value="/Volumes/Data/Development/Java/Libs" />
+		<property name="classes" value="${build}/classes" />
+		<property name="src" value="src" />
+
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/lib" />
+		<mkdir dir="${build}/annotationtest" />
+		<mkdir dir="${classes}" />
+	</target>
+
+	<target name="setcp">
+		<path id="project.class.path">
+			<fileset dir="${jini.home.lib}">
+				<include name="jini*.jar" />
+				<include name="sun-util.jar" />
+				<include name="jsk-platform.jar" />
+				<include name="tools.jar" />
+			</fileset>
+			<fileset dir="${java.home}/lib" includes="tools.jar" />
+			<!-- Include specific project directories -->
+			<fileset dir="lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${java.libs.loc}">
+				<include name="serviceui-1.1a.jar" />
+			</fileset>
+			<pathelement location="${classes}" />
+			<pathelement location="${build}/annotationtest" />
+		</path>
+	</target>
+
+	<target name="clean" depends="init">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="compile" depends="init,setcp">
+		<javac srcdir="${src}" destdir="${classes}" sourcepath="${src}" debuglevel="lines,vars,source" debug="true">
+			<classpath refid="project.class.path" />
+			<exclude name="glyph/**" />
+		</javac>
+	</target>
+
+	<target name="dist" depends="init,setcp,compile">
+		<jar file="${dist}/lib/glyph.jar">
+			<fileset dir="${classes}">
+				<include name="org/jini/glyph/*.class" />
+				<include name="org/jini/glyph/builder/*.class" />
+				<include name="org/jini/glyph/**/*.class" />
+			</fileset>
+			<fileset dir="${src}">
+				<include name="org/jini/glyph/templates/**/*.tmpl" />
+			</fileset>
+		</jar>
+
+	</target>
+
+	<target name="testgeneration" depends="dist">
+
+		<property name="scriptClassPath" refid="project.class.path" />
+
+		<path id="glyphFactory">
+			<fileset dir="${dist}/lib">
+				<include name="glyph.jar" />
+			</fileset>
+		</path>
+
+		<apt factorypathref="glyphFactory" destdir="${build}/annotationtest" factory="org.jini.glyph.GlyphFactory" srcdir="${src}" preprocessdir=".apt_src" fork="true" classpathref="project.class.path">
+			<option name="jiniRoot" value="${jini.home.lib}" />
+			<option name="scriptClasspath" value="${scriptClassPath}" />
+			<option name="dl_port" value="8085" />
+			<option name="dl_file" value="glyphtest-dl.jar" />
+			<option name="groupCodebase" value="http://localhost:8086/lib/group-dl.jar" />
+			<classpath refid="project.class.path" />
+			<include name="glyph/test/simple/*.java" />
+		</apt>
+
+		<jar file="${dist}/lib/glyphtest-dl.jar">
+			<fileset dir="${build}/annotationtest">
+				<include name="glyph/test/simple/HelloIntf.class" />
+				<include name="glyph/test/simple/HelloImplAdmin.class" />
+				<include name="glyph/test/constrainable/*Proxy.class" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="buildpatcher" depends="init,setcp,dist">
+		<mkdir dir="${build}/patcher" />
+		<mkdir dir="${build}/patches" />
+		<mkdir dir="${build}/patches/sun" />
+		<mkdir dir="${build}/patches/glyph" />
+		<javac srcdir="${src}" destdir="${build}/patcher" sourcepath="${src}" debuglevel="lines,vars,source" debug="true">
+			<classpath refid="project.class.path" />
+			<include name="org/jini/glyph/util/**" />
+		</javac>
+		<javac srcdir="${src}" destdir="${build}/patches/sun" sourcepath="${src}" debuglevel="lines,vars,source" debug="true">
+			<classpath refid="project.class.path" />
+			<include name="sun/net/www/protocol/**" />
+		</javac>
+		<javac srcdir="${src}" destdir="${build}/patches/glyph" sourcepath="${src}" debuglevel="lines,vars,source" debug="true">
+			<classpath refid="project.class.path" />
+			<include name="org/jini/glyph/url/**" />
+		</javac>
+
+
+		<jar destfile="${build}/patcher/sunprotocol.patch" basedir="${build}/patches/sun" />
+		<jar destfile="${build}/patcher/glyphprotocol.patch" basedir="${build}/patches/glyph" />
+		<jar destfile="${dist}/lib/glyphpatch.jar">
+			<manifest>
+                <attribute name="Main-Class" value="org.jini.glyph.util.PatchInstaller"/>
+			</manifest>
+			<fileset dir="${build}/patcher">
+				<include name="org/**/*.class" />
+				<include name="*.patch" />
+			</fileset>
+		</jar>
+		<delete file="${build}/patcher/glyphprotocol.patch"/><delete file="${build}/patcher/sunprotocol.patch"/>
+	</target>
+	
+	
+	
+</project>

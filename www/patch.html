@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>URL Patch</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+
+
+
+<body>
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>Patching the Glyph URLs</h2>
+The Two URL handlers that come with Glyph can be patched into the jsk-resources jar, and should be patched into every jsk-resources jar on your federation
+The patch Installer can be downloaded from <a href="downloadpatch.html">here</a>
+There are two forms of the patch called the sun and the glyph patches respectively.<br/>
+Both install exactly the same function but in different packages:<br/>
+<p>
+The sun patch installs the hjar and pack handlers in the sun.net.www.protocol namespace and is therefre automatically detected and available for use in any jini application 
+running on a Sun VM, the glyph patch installer the handlers in the org.jini.glyph.url namespace and requires you to add a system property of :<br/>
+<code>-Djava.protocol.handler.pkgs=org.jini.glyph.url</code>
+</p>
+<p>To install the patch use the following, and ensure that jar.exe is on your path:<br/>
+java -jar glyphpatch.jar &lt;jini-install-directory> &lt;patch-file><br/>
+where patch file is either 'sun.net.www' or 'org.jini.glyph' <br/>
+i.e. java -jar glyphpatch.jar /usr/local/java/jini2_1 sun.net.www<br/>
+<br/>
+<b>Note</b> On windows if you have a directory with a space in it, please use the DOS 8.3 filename i.e. for Incax Eclipse plugin use
+java -jar glyphpatch.jar c:\docume~1\&lt;username>\.incax\eclipse-ce sun.net.www
+</p>
+<p>The old version of your jsk-resources will be called jsk-resources.jar.back</p>
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>

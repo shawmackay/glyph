@@ -1,0 +1,28 @@
+package $[packageName].ui;
+
+import java.awt.Window;
+import java.awt.Frame;
+
+import net.jini.core.lookup.ServiceItem;
+
+import java.awt.Window;
+import java.awt.Frame;
+
+
+import net.jini.lookup.ui.factory.WindowFactory;
+
+public class $[className]UIFactory implements WindowFactory,java.io.Serializable {
+    
+
+    public Window getWindow(Object roleObject, Frame owner) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theWindow = new $[fqName](svItem,owner);
+       	return theWindow;
+    }
+
+    public Window getWindow(Object roleObject, Window owner) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theWindow = new $[fqName](svItem,owner);
+        return theWindow;
+    }
+}

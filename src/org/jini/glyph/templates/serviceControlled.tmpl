@@ -1,0 +1,90 @@
+package $[packageName];
+
+import org.jini.glyph.*;
+
+import java.rmi.Remote;
+import java.rmi.activation.ActivationID;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.rmi.activation.ActivationException;
+import java.rmi.activation.ActivationSystem;
+
+import java.io.IOException;
+
+import net.jini.export.ProxyAccessor;
+import com.sun.jini.start.ServiceProxyAccessor;
+
+import net.jini.config.Configuration;
+import net.jini.config.ConfigurationProvider;
+import net.jini.config.ConfigurationException;
+
+import net.jini.discovery.LookupDiscoveryManager;
+import net.jini.lookup.JoinManager;
+import com.sun.jini.start.LifeCycle;
+
+import org.jini.glyph.chalice.DefaultExporterManager;
+import net.jini.id.Uuid;
+import net.jini.id.UuidFactory;
+import org.jini.glyph.di.DIFactory;
+
+
+public class $[className]ServiceImpl implements ProxyAccessor, ServiceProxyAccessor, net.jini.admin.Administrable, $[className]Service, org.jini.glyph.ContainerControlled {
+
+    private $[className] backend;
+    
+    private ServiceBuilderData serviceData;
+    
+    private $[className]Admin adminObject;
+    
+    private Uuid adminID;
+
+    private Object remoteAdmin;
+    
+     public $[className]ServiceImpl(){
+     }
+    
+    public $[className]ServiceImpl($[delegateClassName] delegate, Configuration config) throws Exception {
+        init(delegate, config);
+    }
+
+    
+
+	public void init(Object delegateObject, Configuration config){
+	try{
+            $[delegateClassName] delegate = ($[delegateClassName] ) delegateObject;
+         //   Configuration config = ConfigurationProvider.getInstance(args);
+            //DIFactory.injectObject(delegate, );
+            this.backend = delegate; 
+            serviceData = new ServiceBuilderImpl().initService(this, config, "$[packageName].$[className]",null);
+      		adminObject = new $[className]AdminImpl(serviceData.getJoinManager(), serviceData.getLookupDiscoveryManager(),serviceData.getActID() );
+            if(serviceData==null)
+                System.out.println("Service Creation failed");
+        }  catch (RemoteException e){
+        	System.err.println("Problem with creating administration object");
+        	e.printStackTrace();
+        }
+       
+   
+	}
+
+    public Object getServiceProxy() throws RemoteException {
+        return serviceData.getServiceProxyObject();
+    }
+
+	public Object getProxy() {
+    	return serviceData.getRemoteProxyObject();
+	}
+
+      public Object getAdmin() throws RemoteException {
+      
+        adminID = UuidFactory.generate();
+        if (remoteAdmin == null)
+            remoteAdmin = DefaultExporterManager.getManager().exportProxy((Remote) adminObject, "$[packageName].$[className]Admin", adminID);
+        return remoteAdmin;
+    }
+
+
+
+    $[methods]
+        
+}

@@ -1,0 +1,42 @@
+
+package $[packageName].ui;
+
+import java.awt.Dialog;
+import java.awt.Frame;
+
+import net.jini.core.lookup.ServiceItem;
+
+import java.awt.Dialog;
+
+import net.jini.lookup.ui.factory.DialogFactory;
+
+public class $[className]UIFactory implements DialogFactory,java.io.Serializable {
+    
+    
+
+    public Dialog getDialog(Object roleObject, Dialog dialog) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theDialog = new $[fqName](svItem,dialog);
+       	return theDialog;
+    }
+
+    public Dialog getDialog(Object roleObject, Dialog dialog, boolean modal) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theDialog = new $[fqName](svItem,dialog,modal);
+        return theDialog;
+    }
+
+    public Dialog getDialog(Object roleObject, Frame frame) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theDialog = new $[fqName](svItem,frame);
+        return theDialog;
+    }
+
+    public Dialog getDialog(Object roleObject, Frame frame, boolean modal) {
+    	ServiceItem svItem = (ServiceItem) roleObject;
+    	$[fqName] theDialog = new $[fqName](svItem,frame,modal);
+        return theDialog;
+    }
+}
+
+

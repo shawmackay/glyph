@@ -1,0 +1,22 @@
+
+package $[packageName].ui;
+
+import java.awt.Dimension;
+
+import java.awt.Frame;
+
+import net.jini.core.lookup.ServiceItem;
+
+
+public class $[className]UIFactory implements net.jini.lookup.ui.factory.FrameFactory, java.io.Serializable {
+
+
+	public Frame getFrame(Object roleObject) {
+		ServiceItem svItem = (ServiceItem) roleObject;
+		$[fqName] theFrame = new $[fqName](svItem);
+		theFrame.setSize(new Dimension($[dimensionX],$[dimensionY]));
+		return theFrame;
+
+	}
+
+}

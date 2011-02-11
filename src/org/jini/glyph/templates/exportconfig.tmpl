@@ -1,0 +1,16 @@
+import net.jini.jeri.*;
+import net.jini.jeri.http.*;
+import javax.security.auth.login.LoginContext;
+import com.sun.jini.config.ConfigUtil;
+import java.net.URL;
+
+ExportManager {
+    mgrDefs = new String[]{"$[packageName].$[className]"};
+}
+
+ExportManager.$[packageName].$[className]{
+    exporterClass = BasicJeriExporter.class;
+    serverEndpoint = HttpServerEndpoint.getInstance(0);
+    ILFactory = new BasicILFactory();
+    proxyCreator = new $[proxyCreator]();
+}

@@ -1,0 +1,21 @@
+<project name="buildclassdep" default = "buildclassdep">
+<target name="buildclassdep">
+<path id="classdep.project.classpath">
+			<path refid="project.classpath" />
+			<pathelement location="$[classdepBuildRoot]" />
+		</path>
+<echo message="Building classdep jar ${dist}/lib-dl/$[projectName]-dl.jar"/>
+<classdepandjar jarfile="${dist}/lib-dl/$[projectName]-dl.jar">
+	<classpath refid="classdep.project.classpath"/>
+    $[loop: packages as entry]
+        <in name="$[entry]"/>$[endloop]
+    $[loop: classes as entry]
+        <topclass  name="$[entry]"/>$[endloop]
+</classdepandjar>
+
+		<hjar classesJar="${dist}/lib-dl/$[projectName]-dl.jar" destfile="${dist}/lib-dl/$[projectName]-dl.hjar">
+		$[loop: hjarlibrefs as entry]
+			<fileset refid="$[entry]"/>$[endloop]
+		</hjar>
+</target>
+</project>

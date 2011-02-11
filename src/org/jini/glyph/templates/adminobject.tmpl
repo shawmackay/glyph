@@ -1,0 +1,145 @@
+package $[packageName];
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.rmi.activation.ActivationID;
+import java.rmi.activation.ActivationSystem;
+
+import net.jini.activation.ActivationGroup;
+import net.jini.core.discovery.LookupLocator;
+import net.jini.core.entry.Entry;
+import net.jini.discovery.LookupDiscoveryManager;
+import net.jini.lookup.JoinManager;
+
+import org.jini.glyph.Exportable;
+import org.jini.glyph.AdminInit;
+
+import net.jini.admin.JoinAdmin;
+
+import com.sun.jini.admin.DestroyAdmin;
+
+@Exportable
+public class $[className]AdminImpl implements  $[className]Admin, AdminInit {
+
+    JoinManager jm;
+
+    LookupDiscoveryManager ldm;
+
+    ActivationID theID;
+    
+    public $[className]AdminImpl() throws RemoteException{
+    }
+
+    public $[className]AdminImpl(JoinManager jm, LookupDiscoveryManager ldm, ActivationID theID) throws RemoteException { 	
+		init(jm,ldm,theID);
+    }
+    
+    public void init(JoinManager jm, LookupDiscoveryManager ldm, ActivationID theID) {
+		this.jm = jm;
+		this.ldm = ldm;
+		this.theID = theID;
+    }
+
+    public void destroy() throws RemoteException {
+	Thread termThread = new Thread(new Terminationthread());
+	termThread.setDaemon(false);
+	termThread.start();
+    }
+
+    private class Terminationthread extends Thread {
+	/**
+         * Main processing method for the termthread object
+         * 
+         * @since
+         */
+
+	public void run() {
+
+	   
+		System.setProperty("terminating$[className]", "true");
+	    System.err.println("Shutting down service");
+	    System.err.println("Terminating - checking activation ID");
+
+	    if (theID != null) {
+		try {
+		    ActivationSystem sys = ActivationGroup.getSystem();
+		    System.out.println("Deregistering from activation system");
+		    sys.unregisterObject(theID);
+		} catch (Exception ex) {
+		    ex.printStackTrace();
+		}
+
+		System.out.println("Terminating join managers");
+		try {
+		    ldm.terminate();
+		    jm.terminate();
+		} catch (Exception ex) {
+		    ex.printStackTrace();
+		}
+	    } else {
+		System.out.println("Terminating join managers");
+		try {
+		    ldm.terminate();
+		    jm.terminate();
+		    System.exit(0);
+		} catch (Exception ex) {
+		    ex.printStackTrace();
+		}
+
+	    }
+
+	}
+    }
+    public void addLookupAttributes(Entry[] entries) throws RemoteException {
+        jm.addAttributes(entries, true);
+    }
+
+    public void addLookupGroups(String[] strings) throws RemoteException {
+        try {
+            ldm.addGroups(strings);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addLookupLocators(LookupLocator[] lookupLocators) throws RemoteException {
+        ldm.addLocators(lookupLocators);
+    }
+
+    public Entry[] getLookupAttributes() throws RemoteException {
+        return jm.getAttributes();
+
+    }
+
+    public String[] getLookupGroups() throws RemoteException {
+        return ldm.getGroups();
+    }
+
+    public LookupLocator[] getLookupLocators() throws RemoteException {
+        return ldm.getLocators();
+    }
+
+    public void modifyLookupAttributes(Entry[] entries, Entry[] entries1) throws RemoteException {
+        jm.modifyAttributes(entries, entries1, true);
+    }
+
+    public void removeLookupGroups(String[] strings) throws RemoteException {
+        ldm.removeGroups(strings);
+    }
+
+    public void removeLookupLocators(LookupLocator[] lookupLocators) throws RemoteException {
+        ldm.removeLocators(lookupLocators);
+    }
+
+    public void setLookupGroups(String[] strings) throws RemoteException {
+        try {
+            ldm.setGroups(strings);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setLookupLocators(LookupLocator[] lookupLocators) throws RemoteException {
+        ldm.setLocators(lookupLocators);
+    }
+}

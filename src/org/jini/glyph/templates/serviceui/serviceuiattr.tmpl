@@ -1,0 +1,11 @@
+  	net.jini.lookup.entry.UIDescriptor $[className]Desc = null;
+        try {
+            $[className]Desc = new net.jini.lookup.entry.UIDescriptor("$[role]", $[packageName].ui.$[className]UIFactory.TOOLKIT, null, new java.rmi.MarshalledObject(
+            new $[packageName].ui.$[className]UIFactory()));
+            $[className]Desc.attributes = new java.util.HashSet();
+            $[className]Desc.attributes.add(new net.jini.lookup.ui.attribute.UIFactoryTypes(java.util.Collections.singleton(net.jini.lookup.ui.factory.$[factoryType]Factory.TYPE_NAME)));
+      } catch (java.io.IOException ex) {
+          ex.printStackTrace();
+      }
+      
+      arr.add($[className]Desc);

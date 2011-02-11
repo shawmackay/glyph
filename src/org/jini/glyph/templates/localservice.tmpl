@@ -1,0 +1,98 @@
+package $[packageName];
+
+import org.jini.glyph.*;
+
+import java.rmi.Remote;
+import java.rmi.activation.ActivationID;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.rmi.activation.ActivationException;
+import java.rmi.activation.ActivationSystem;
+
+import java.io.IOException;
+
+import net.jini.export.ProxyAccessor;
+import com.sun.jini.start.ServiceProxyAccessor;
+
+import net.jini.config.Configuration;
+import net.jini.config.ConfigurationProvider;
+import net.jini.config.ConfigurationException;
+
+import net.jini.discovery.LookupDiscoveryManager;
+import net.jini.lookup.JoinManager;
+import com.sun.jini.start.LifeCycle;
+
+import org.jini.glyph.chalice.DefaultExporterManager;
+import net.jini.id.Uuid;
+import net.jini.id.UuidFactory;
+import org.jini.glyph.di.DIFactory;
+
+
+public class $[className]ServiceImpl implements ProxyAccessor, ServiceProxyAccessor, $[className]Service {
+
+    private $[className] backend;
+    
+    private ServiceBuilderData serviceData;
+        
+    
+    public $[className]ServiceImpl(String args[], LifeCycle aLifecycle) throws Exception {
+        init(args,null);
+    }
+
+    public $[className]ServiceImpl(String[] args){
+    	init(args,null);
+    }
+    
+    
+    public $[className]ServiceImpl(ActivationID activationID,
+                MarshalledObject data) throws IOException,
+                                              ActivationException,
+                                              ConfigurationException,
+                                              ClassNotFoundException{
+    
+    	Object configData=data.get();
+    	
+    	init((String[])configData,activationID);
+    
+    }
+
+	private void init(String[] args, ActivationID actid){
+	try{
+            $[delegateClassName] delegate = new $[delegateClassName](args);
+            Configuration config = ConfigurationProvider.getInstance(args);
+            System.out.println("Injecting");
+            DIFactory.injectObject(delegate, args[0]);
+            this.backend = delegate; 
+            serviceData = new ServiceBuilderImpl().initLocalService(backend, config, "$[packageName].$[className]",actid);
+            if(serviceData==null)
+                System.out.println("Service Creation failed");
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        } 
+        System.out.println("Waiting....");
+   
+	}
+
+    public Object getServiceProxy() throws RemoteException {
+        return serviceData.getServiceProxyObject();
+    }
+
+	public Object getProxy() {
+    	return serviceData.getRemoteProxyObject();
+	}
+
+
+    public static void main(String[] args){ 
+    	try {
+    		System.setSecurityManager(new java.rmi.RMISecurityManager());
+    	} catch (Exception ex) {
+    		System.err.println("Unable to initialise Security Manager....exiting");
+    		System.exit(1);
+    	}
+        new $[className]ServiceImpl(args);
+        
+    }
+
+    $[methods]
+        
+}

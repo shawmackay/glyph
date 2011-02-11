@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>@Injection</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>Dependency Injection through Jini configuration files</h2>
+
+<b>Note:</b> Glyph's dependency injection engine is under heavy development.....<br/><br/>
+
+The @Injection annotation is a runtime annotation that is used to merge a Jini configuration file with an object and automatically set the objects fields.<br/>
+Injection occurs by calling <code>org.jini.glyph.di.DIFactory.injectObject(Object ob, String configFileName)</code> and, after checking that the object has the Injection annotation,
+will proceed to parse the configuration checking for entries in the Configuration component that match a setter on the object i.e.
+<pre>package glyph.test.local;
+
+import java.io.Serializable;
+import java.rmi.RemoteException;
+
+import org.jini.glyph.Injection;
+import org.jini.glyph.LocalService;
+
+
+@LocalService( administrable=true)
+@Injection
+public class MyLocalImpl implements MyLocal {
+    
+    private String greeting = "Hello";
+    
+    public MyLocalImpl(String[] args){
+        System.out.println("Creating Local Service");
+    }
+    
+    public String sayHello(String name) {
+        System.out.println("Executing sayHello method with parameter: " + name);
+        return greeting + ", " + name + "!";
+    }
+    
+    public void setGreeting(String name){
+        System.out.println("Setting Greeting to: "+ name);
+        this.greeting = name;
+    }
+}</pre>
+
+And assuming the following configuration file
+<pre>import net.jini.discovery.LookupDiscovery;
+import net.jini.lookup.entry.*;
+import net.jini.core.entry.*;
+
+glyph.test.local.MyLocal{
+	   initialGroups = LookupDiscovery.ALL_GROUPS;
+       initialLocators = null;
+       initialAttributes = new Entry[]{new Name("MyLocal")};
+       exporterTypeName = "glyph.test.local.MyLocal";
+       confdir="D:/development/workspace/glyph/build_test/local";
+       exporterDefDir="D:/development/workspace/glyph/build_test/local/conf/expdir";
+	   persistentDirectory="D:/development/workspace/glyph/build_test/local/log/MyLocal";
+	   <b>greeting="Good Morning";</b>
+} 	</pre>
+<p>The dependency Injection engine takes the fully qualified classname  of the object and finds a component with the same name (if the classname has Impl or Adapter on the end, it disregards
+those words so MyLocalImpl will be seen as just MyLocal for DI purposes)</p>
+<p>Although the DI Engine in Glyph is currently not particularly powerful, it is a start in the right direction and as time goes on it is hoped that we can progress it further.
+<hr/>
+<a href="index.html">Back to Index</a>
+
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>
