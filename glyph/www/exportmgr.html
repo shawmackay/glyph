@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Exporter Manager</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>ExporterManager</h2>
+<p>ExporterManager is one of the utilities that comes as part of a section of Glyph called <i>Chalice</i><br/>
+ExporterManager is designed to manage a set of definitions and any instances of exported proxies. It's used so that the service developer does not have to maintain the remote, and wrappered service, proxies.
+Also it takes care of wrappering a remote object to create a smart proxy and allows you to pick which definition you want to use to export an object under (as long as the ProxyCreator recognises the input class), and create multiple different concurrent managed sets.
+</p>
+<h2>Configuration Files</h2>
+<p>
+ExporterManager uses specially designed configuration files and entries to build a ExporterDefinition.
+There is a bootstrap component in any file that you want to use for managed entries<br/>
+The component Name is ExporterManager and requires an entry called 'mgrDefs' that returns a string array of all other component names that will be used to build the set of defnitions.<br/>
+A sample configuration file is shown below
+</p>
+<a name="sampleconfig"/>
+<div class="example">import org.somewhere.remote.creators.*;
+import net.jini.jeri.*;
+import net.jini.jeri.http.*;
+
+ExportManager {
+    mgrDefs = new String[]{"Standard", "Connectors", "Broker"};
+}
+
+ExportManager.Standard{
+    exporterClass = BasicJeriExporter.class;
+    serverEndpoint = HttpServerEndpoint.getInstance(0);
+    ILFactory = new BasicILFactory();
+}
+
+ExportManager.Connectors {
+    exporterClass = BasicJeriExporter.class;
+    serverEndpoint = HttpServerEndpoint.getInstance(0);
+    ILFactory = new BasicILFactory();
+	proxyCreator = new ConnectorCreator();
+}
+
+
+ExportManager.Broker{
+   	exporterClass = BasicJeriExporter.class;
+    serverEndpoint = HttpServerEndpoint.getInstance(0);
+	ILFactory = new BasicILFactory();
+	proxyCreator = new BrokerCreator();
+}</div>
+<p>
+Every exporter definition component name must be prefixed with the name <strong>'ExportManager'</strong>.<br/>
+Each exporter definition has 5 possible components<br/>
+</p>
+<table cellpadding="0" cellspacing="0">
+<tr><th>Entry</th><th>Description</th></tr>
+<tr><td>exporterClass</td><td>The name of the exporter class that yiou will create to do the actual export of your object</td></tr>
+<tr><td>serverEndpoint</td><td>The network endpoint for your exported object</td></tr>
+<tr><td>ILFactory</td><td>The Invocation Layer Factory that your exported object wil use</td></tr>
+<tr><td>proxyCreator</td><td>The object that will be used to create a smart proxies that wraps your remote proxy</td></tr>
+<tr><td>referentialInstance</td><td>A path to another fully defined exporter instance</td></tr>
+</table>
+
+<h3>Referential Instances</h3>
+A referential instance uses a full path to attach to an already defined exporter<br/>
+Consider the following configuration file
+<div class="example">import net.jini.jeri.http.HttpServerEndpoint;
+import net.jini.jeri.BasicILFactory;
+import net.jini.jeri.BasicJeriExporter;
+
+org.somewhere.myservice {
+    myServerExporter = new BasicJeriExporter(HttpServerEndpoint.getInstance(0),new BasicILFactory(), false, true);
+
+}</div>
+Let's say this is in myservice.config. Now myServerExporter could be far more complicated or a custom exporter class that doesn't fit well into the other way of defining exporters for ExportManager. So to reference this we would need to do the following
+<div class="example">import org.somewhere.remote.creators.*;
+import net.jini.jeri.*;
+import net.jini.jeri.http.*;
+
+ExportManager {
+    mgrDefs = new String[]{"myService"};
+}
+
+ExportManager.myService{
+    referentialInstance="myservice.config/org.somewhere.myservice/myServerExporter";
+}</div>
+<strong>Note:</strong> As we haven't specified a proxy Creator, we will not do any wrapping of the exported proxy, although if we add the proxyCreator entry with an appropriate class, wrappering will occur.
+
+
+
+<h2>Using Exporter Manager in code</h2>
+<p>
+To use ExporterManager you must initialise a manager. Glyph comes with a DefaultExporterManager which should for most cases suffice.
+To initialise the manager use one of the following:
+
+
+<div align="left" class="java">
+<table border="0" cellpadding="3" cellspacing="0" bgcolor="#ffffff">
+   <tr>
+  <!-- start source code -->
+   <td nowrap="nowrap" valign="top" align="left">
+    <code>
+<font color="#000000">String&nbsp;exporterDirectory&nbsp;=&nbsp;</font><font color="#000000">(</font><font color="#000000">String</font><font color="#000000">)&nbsp;</font><font color="#000000">config.getEntry</font><font color="#000000">(</font><font color="#000000">componentName,&nbsp;</font><font color="#2a00ff">&#34;exporterDefDir&#34;</font><font color="#000000">,&nbsp;String.class,&nbsp;</font><font color="#2a00ff">&#34;conf/expdir&#34;</font><font color="#000000">)</font><font color="#000000">;</font><br />
+<font color="#000000">DefaultExporterManager.loadManagersFromDir</font><font color="#000000">(</font><font color="#000000">exporterDirectory</font><font color="#000000">)</font><font color="#000000">;</font></code>
+    
+   </td>
+  <!-- end source code -->
+   </tr>
+</table>
+</div>
+Or
+<div align="left" class="java">
+<table border="0" cellpadding="3" cellspacing="0" bgcolor="#ffffff">
+   <tr>
+  <!-- start source code -->
+   <td nowrap="nowrap" valign="top" align="left">
+    <code>
+<font color="#000000">DefaultExporterManager.loadManager</font><font color="#000000">(</font><font color="#2a00ff">&#34;default&#34;</font><font color="#000000">,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">(</font><font color="#000000">String</font><font color="#000000">)&nbsp;</font><font color="#000000">config.getEntry</font><font color="#000000">(</font><font color="#2a00ff">&#34;org.jini.projects.neon&#34;</font><font color="#000000">,&nbsp;</font><font color="#2a00ff">&#34;exporterMgrConfig&#34;</font><font color="#000000">,&nbsp;String.</font><font color="#7f0055"><b>class</b></font><font color="#000000">))</font><font color="#000000">;</font></code>
+    
+   </td>
+  <!-- end source code -->
+   </tr>
+</table>
+</div>
+<h4>Using directories</h4>
+The first example will descend a particular directory (in the default case 'conf/expdir', if you don't specify a value in the configuration).<br/>
+The directory structure looks like this:
+<pre>\---expdir
+    \---default					<--Manager name
+            HelloImpl.config	<-Configuration file
+            HelloImplAdminImpl.config
+</pre>
+And in this example HelloImpl.config is:
+<div class="example" id="example1" >import net.jini.jeri.*;
+import net.jini.jeri.http.*;
+import javax.security.auth.login.LoginContext;
+import com.sun.jini.config.ConfigUtil;
+import java.net.URL;
+
+ExportManager {
+    mgrDefs = new String[]{"glyph.test.simple.HelloImpl"};
+}
+
+ExportManager.glyph.test.simple.HelloImpl{
+    exporterClass = BasicJeriExporter.class;
+    serverEndpoint = HttpServerEndpoint.getInstance(0);
+    ILFactory = new BasicILFactory();
+    proxyCreator = new glyph.test.simple.constrainable.HelloImplCreator();
+}
+</div>
+When you use @Exportable annotations, glyph will use this directory system, because it can create definition files as it goes, rather than wait for them all to be in one configuration file
+<h4>Using a single configuration file</h4>
+A single configuration file can be used to aggregate all definitions for a particular manager together in one file, as shown <a href="#sampleconfig">here</a><br/>
+This allows you to put all your definitions in one file for easy access, or put them in together with your normal service configuration file.<br/>
+If you use this method, you must give a particular name to your manager.<br/>
+<strong>Note:</strong> There are a number of tweaks that need to be put into the definition loading, so that you can use both methods, and specify what manager you want your export config files to be under (currently it is set to 'default')</br>
+</p>
+<h3>Exporting a remote proxy</h3>
+<p>Once you've loaded your exporter definitions, it is much easier to export your remote objects.<br/>
+All you have to do is the following:</p>
+
+
+<div align="left" class="java">
+<table border="0" cellpadding="3" cellspacing="0" bgcolor="#ffffff">
+   <tr>
+  <!-- start source code -->
+   <td nowrap="nowrap" valign="top" align="left">
+    <code>
+<font color="#000000">Uuid&nbsp;myUuid&nbsp;=&nbsp;UuidFactory.generate</font><font color="#000000">()</font><font color="#000000">;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><br />
+<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">ProxyPair&nbsp;exportPair&nbsp;=&nbsp;DefaultExporterManager.getManager</font><font color="#000000">(</font><font color="#2a00ff">&#34;default&#34;</font><font color="#000000">)</font><font color="#000000">.exportProxyAndPair</font><font color="#000000">(</font><font color="#000000">serviceObject,&nbsp;myExportTypeName,&nbsp;myUuid</font><font color="#000000">)</font><font color="#000000">;</font></code>
+    
+   </td>
+  <!-- end source code -->
+   </tr>
+</table>
+</div>
+<p>You <b>must</b> keep track of the Uuid that you pass into the exporter manager; you will need that if you have to unexport (or relinquish) the exported proxy. The return from this method call gives you a ProxyPair object, that gives you access to the remote proxy, as generated by the exporter amd
+the smart proxy that wrappers it, if you don't specify a Proxy Creator in the Exporter definition, these two will refer to the same object - the remote proxy as generated by the Exporter.
+</p>
+<h3>Unexporting a remote proxy</h3>
+<p>
+There are two ways to unexport a remote proxy.<br>	
+You can do this immediately by calling the <code>public synchronized void relinquish(String exporterName, Uuid identity)</code> or schedule the cleanup by using <code>public void scheduleRelinquish(String exporterName, Uuid identity, long delay)</code><br/>
+You can use <code>scheduleRelinquish</code> to unexport transaction participant proxies after <code>commit()</code> or <code>abort()</code> for example, or on say a <code>close()</code> method where you want the method call to complete before unexporting the remote object.
+</p><p>You can also unexport all proxies on a particular name, or all proxies that the manager is using, by calling<code>relinquishAll(String exporterName)</code> and <code>relinquishAll()</code>  respectively.
+<hr/>
+<a href="index.html">Back to Index</a>
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>

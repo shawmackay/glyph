@@ -1,0 +1,10 @@
+<html>
+	<head>
+		<title>Hello $[name]!</title>
+	</head>
+	<body>
+		$[var:colfirst= $[downcase:$[substring:color,$[start],$[end]]]]
+		$[if:color]<font color='$[upcase:color]'>Hello There, $[name] Color first 2 chars: $[colfirst]</font>$[endif]
+		$[if:!color]Hello There, $[name]$[endif]
+	</body>
+</html>

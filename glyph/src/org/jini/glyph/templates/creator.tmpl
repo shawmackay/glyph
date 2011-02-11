@@ -1,0 +1,14 @@
+package $[packageName].constrainable;
+
+/* Generated via Exportable Annotations */
+
+public class $[className]Creator implements org.jini.glyph.chalice.builder.ProxyCreator{
+
+   public java.rmi.Remote create(java.rmi.Remote in, net.jini.id.Uuid uuid){
+        if(in instanceof net.jini.core.constraint.RemoteMethodControl){
+            return new $[packageName].constrainable.$[className]Proxy.ConstrainableProxy(($[mainParentInterface]) in, uuid, null);
+       }else
+            return new $[packageName].constrainable.$[className]Proxy(($[mainParentInterface]) in, uuid);
+       }
+}  
+

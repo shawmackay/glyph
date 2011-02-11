@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>@Service</title>
+<meta http-equiv="Content-Type" content="text/html">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>@Service</h2>
+The @Service annotation is generally used alongside the @Exportable annotation and a sample class is shown below
+<pre>package glyph.test.simple;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+import org.jini.glyph.Exportable;
+import org.jini.glyph.Service;
+import org.jini.glyph.chalice.DefaultExporterManager;
+import net.jini.id.Uuid;
+import net.jini.id.UuidFactory;
+
+public class HelloImpl implements HelloIntf {
+
+    private Object adminObject;
+
+    private Uuid adminID;
+
+    private Object remoteAdmin;
+
+    public HelloImpl(String[] args) {
+    }
+
+    public Object getAdmin() throws RemoteException {
+        adminID = UuidFactory.generate();
+        if (remoteAdmin == null)
+            remoteAdmin = DefaultExporterManager.getManager().exportProxy((Remote) adminObject, adminObject.getClass().getName(), adminID);
+        return remoteAdmin;
+    }
+
+    public void setAdmin(Object admin) {
+        System.out.println("Set admin to: " + admin.getClass().getName());
+        this.adminObject = admin;
+    }
+
+    public String sayHello(String name) throws RemoteException {
+        System.out.println("Excuting sayHello method with parameter: " + name);
+        return "Hello, " + name + "!";
+    }
+}</pre>
+
+To allow the full service to be created you must add the follwoing annotations to the class defnition
+<pre><strong>@Service
+@Exportable(parentInterfaces = "net.jini.admin.Administrable")</strong>
+public class HelloImpl implements HelloIntf {
+
+</pre>
+
+What happens when you run apt against this class is broken down into two sections
+<ol>
+<li>A smart proxy, a proxycreator, and a exporter manager configuration is created, to support exporting the object</li>
+<li>A service class is created along with associated configuration files</li>
+</ol>
+
+For more information on exporting objects see <a href="exportable.html">here</a>
+<p>When the service annotation is detected the following things are written:
+<ul>
+<li>Implements ProxyAccessor, and ServiceProxyAccessor, and any interfaces picked up as Remote, or specified in the Exportable annotation</li>
+<li>Writes Service starter methods for nonactivatable and activatable modes, as well as a standalone main() method</li>
+<li>Creates an Administration Interface that extends JoinAdmin and DestroyAdmin</li>
+<li>Generates an implementation of the Admin Interface which is then put back into the source instance through the setAdmin() method</li>
+<li>Creates a basic service configuration</li>
+<li>Creates Non-activatable, Activatable, and Group service starter configurations</li>
+<li>Creates shell scripts for non-activatable and activatable startup</li>
+<li>Creates a default policy file</li>
+</ul>
+</p>
+<p>Running apt on this will create the following output tree:<br/>
+<img src="images/servicetree.png"/>
+</p>
+You will have to jar up your original service interface (in this instance glyph.test.simple.HelloIntf), the Admin interface (glyph.test.simple.HelloImplAdmin) and the proxy classes (glyph.test.simple.constrainable.*Proxy) and put them with any other
+classes you need in your dl jar file.
+<hr/>
+<a href="index.html">Back to Index</a>
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>

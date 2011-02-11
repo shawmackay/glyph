@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>@ServiceUI</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>Defining UIs for your services</h2>
+With Jini, you can bind a ServiceUI factory to your service as a lookup attribute, and ServiceUI-aware applications, such as service browsers can detect the attribute and pass the service to the factory.
+The factory can then create a UI Component (Panel, Frame, etc.) at the client application and bind the service object to the clien, such that an interface to the service is
+downloaded and installed into the client on demand<br/>
+Essentially this is done via the UIFactory  and the UIRole (Admin, Main or About). The UI Factory class implements a particular type of Service UI UIFactory interface, which will create the Component
+and return it to the caller for display.<br/>
+<h3>@ServiceUI</h3>
+<p>The @ServiceUI annotation is responsible for generating the factory code, and adding the UI to the list that will later be added to the Services AttributeBuilder.<code>AttributeBuilder</code> is a set of 
+Lookup Attributes that are added at runtime, after the user defined ones are loaded from the services configuration file.
+</p>
+<p>When you use the @ServiceUI annotation you may specify a role, and an id, and a factory (if required); as follows</p>
+<p><code>@ServiceUI<br/>
+public class HelloPanel extends JPanel {</code><br/>
+or <code>
+@ServiceUI(role="admin", id="service1")<br/>
+public class HelloPanel extends JPanel {</code>
+</p><p>The <b>role</b> is one of 'admin', 'main' or 'about', and defaults to main (These each relfect one of the ServiceUI <code>UIDescriptor</code> roles), 
+and the id attribute refers to one of your service <a href="service.html#identifiers">identifiers and defaults to 'default'</a>.
+What the<b>direct</b> superclass is of your serviceUI component, affects the type of Factory that is created.</p>
+<table cellpadding="0" cellspacing="0">
+	<tr><th>Component's superclass is...</th><th>UIFactory is...</th></tr>
+	<tr><td>Dialog</td><td>net.jini.lookup.ui.factory.DialogFactory</td></tr>
+	<tr><td>Frame</td><td>net.jini.lookup.ui.factory.FrameFactory</td></tr>
+	<tr><td>Panel</td><td>net.jini.lookup.ui.factory.PanelFactory</td></tr>
+	<tr><td>Window</td><td>net.jini.lookup.ui.factory.WindowFactory</td></tr>
+	<tr><td>JDialog</td><td>net.jini.lookup.ui.factory.JDialogFactory</td></tr>
+	<tr><td>JFrame</td><td>net.jini.lookup.ui.factory.JFrameFactory</td></tr>
+	<tr><td>JWindow</td><td>net.jini.lookup.ui.factory.JWindowFactory</td></tr>
+	<tr><td>.....</td><td>net.jini.lookup.ui.factory.JComponentFactory</td></tr>
+</table>
+<br/>
+In the examples above, it doesn't match anything and so defaults to JComponentFactory which is fine for our JPanel
+
+<p>You can override this by spcecifying the type of component factory you want to use, by using the <code>factory</code> attribute i.e</p>
+<code>
+@ServiceUI(role="admin",  factory="JFrame")<br/>
+public class MyServiceFrame extends MyCompanyBaseJFrame {</code>
+
+<h3>Generated code</h3>
+The ServiceUI annotation generates the factory class, and a snippet that is used in the AttributeBuilder, after all you may have more than one serviceUI generated for a service (perhaps an AdminUI and a MainUI).
+It also tags these classes and the class that the annotation is one as being required to be placed in the <a href="http://classdepandjar.dev.java.net">classdepandjar</a> <code>topclass</code> section.
+
+<h2>Notes</h2>
+You will need to add all necessary constructors that are used by the Factory and the first parameter to each constructor will be an instance of <code> net.jini.core.lookup.ServiceItem</code>
+
+<hr/>
+<a href="index.html">Back to Index</a>
+
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>

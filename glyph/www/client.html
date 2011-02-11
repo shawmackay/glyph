@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>@Client</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="glyph.css" rel="stylesheet" type="text/css">
+</head>
+
+
+
+<body>
+<div style="background-color:black;height:256;text-align:middle;margin-bottom:12px;"><img src="images/glyphtitle.png"/></div>
+<h2>@Client</h2>
+<p>The client annotation enables you to quickly create a client to any Jini service. Unlike other annotations, @Client is placed on a method and there can only be one method in a class marked with @Client and the method can only have one parameter - the Lookup Class <strong>[NB </strong>
+- efforts are being made to reduce these restrictions somewhat, although this will be in a future point release.]</p>
+An example of a client to a Javaspace is shown below:<br/>
+<pre>package glyph.test.simple;
+
+import java.rmi.RemoteException;
+import net.jini.core.lease.Lease;
+import net.jini.core.transaction.TransactionException;
+import net.jini.lookup.entry.Name;
+import net.jini.space.JavaSpace05;
+import org.jini.glyph.Client;
+
+public class TestClient {
+	@Client
+	public void writeMyEntry(JavaSpace05 myspace){
+		try {
+			Name ne = new Name("Joe Bloggs");
+			myspace.write(ne, null, Lease.FOREVER);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransactionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}</pre>
+<br/>Essentially, when compiled through apt, the annotation creates startup scripts and service-starter configurations for launching the client. The actual Client that is called by ServiceStarter is a <i>ClientBinder</i> implementation, that handles all the lookup and discovery to a service, and then calls the method with the service refrerence - in this case an instance of <em>net.jini.space.JavaSpace05</em>
+
+<h3>A word of caution.....</h3>
+@Client is a newly added annotation and will require some changes particularly to messages and timeouts, as well as to issues about availiability of services and looking up multiple service types (i.e. multiple @Client annotations in the same class), and issues over cardinality of services and what happens when a service
+ is removed from the network and how that affects the client.<i>Of course, being generated code, you can always handle some of that yourself and also feedback into the project your client use cases so that they may allow us to progress these issues<hr/>
+<a href="index.html">Back to Index</a>
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-443086-2";
+urchinTracker();
+</script>
+</body>
+</html>
